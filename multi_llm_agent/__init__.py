@@ -9,10 +9,12 @@ from .orchestrator import MultiLLMOrchestrator
 from .search_agent import ComprehensiveSearchAgent
 from .aggregator import ResponseAggregator
 from .time_tracker import TimeTracker
+from .output_manager import OutputManager
 
 __all__ = [
     "MultiLLMOrchestrator",
     "ComprehensiveSearchAgent",
     "ResponseAggregator",
     "TimeTracker",
+    "OutputManager",
 ]

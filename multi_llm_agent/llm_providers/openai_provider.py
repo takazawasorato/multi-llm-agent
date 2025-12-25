@@ -42,11 +42,12 @@ class OpenAIProvider(BaseLLMProvider):
         messages.append({"role": "user", "content": prompt})
 
         try:
+            # 新しいAPIではmax_completion_tokensを使用
             response = await self.async_client.chat.completions.create(
                 model=self.model,
                 messages=messages,
                 temperature=kwargs.get("temperature", self.temperature),
-                max_tokens=kwargs.get("max_tokens", self.max_tokens),
+                max_completion_tokens=kwargs.get("max_tokens", self.max_tokens),
             )
 
             response_time = time.time() - start_time
@@ -54,7 +55,7 @@ class OpenAIProvider(BaseLLMProvider):
             return LLMResponse(
                 provider=self.provider_name,
                 model=self.model,
-                content=response.choices[0].message.content,
+                content=response.choices[0].message.content or "",
                 tokens_used=response.usage.total_tokens if response.usage else None,
                 finish_reason=response.choices[0].finish_reason,
                 response_time=response_time,
@@ -89,11 +90,12 @@ class OpenAIProvider(BaseLLMProvider):
         messages.append({"role": "user", "content": prompt})
 
         try:
+            # 新しいAPIではmax_completion_tokensを使用
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,
                 temperature=kwargs.get("temperature", self.temperature),
-                max_tokens=kwargs.get("max_tokens", self.max_tokens),
+                max_completion_tokens=kwargs.get("max_tokens", self.max_tokens),
             )
 
             response_time = time.time() - start_time
@@ -101,7 +103,7 @@ class OpenAIProvider(BaseLLMProvider):
             return LLMResponse(
                 provider=self.provider_name,
                 model=self.model,
-                content=response.choices[0].message.content,
+                content=response.choices[0].message.content or "",
                 tokens_used=response.usage.total_tokens if response.usage else None,
                 finish_reason=response.choices[0].finish_reason,
                 response_time=response_time,

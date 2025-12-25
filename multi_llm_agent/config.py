@@ -45,9 +45,12 @@ class Config:
     # 統合設定
     enable_parallel_processing: bool = True
     aggregation_model: str = "gpt-4"  # 統合に使用するモデル
+    aggregation_max_tokens: int = 4000  # 統合用の最大トークン数
+    aggregation_temperature: float = 0.7  # 統合用の温度パラメータ
 
     # タイムアウト設定
-    llm_timeout: int = 60  # 秒
+    llm_timeout: int = 60  # 秒（通常のLLMクエリ用）
+    aggregation_timeout: int = 180  # 秒（統合処理用、長いプロンプトに対応）
     search_timeout: int = 30  # 秒
 
     # デバッグ
@@ -107,7 +110,10 @@ class Config:
             search=search,
             enable_parallel_processing=os.getenv("ENABLE_PARALLEL", "true").lower() == "true",
             aggregation_model=os.getenv("AGGREGATION_MODEL", "gpt-4"),
+            aggregation_max_tokens=int(os.getenv("AGGREGATION_MAX_TOKENS", "4000")),
+            aggregation_temperature=float(os.getenv("AGGREGATION_TEMPERATURE", "0.7")),
             llm_timeout=int(os.getenv("LLM_TIMEOUT", "60")),
+            aggregation_timeout=int(os.getenv("AGGREGATION_TIMEOUT", "180")),
             search_timeout=int(os.getenv("SEARCH_TIMEOUT", "30")),
             debug=os.getenv("DEBUG", "false").lower() == "true",
             verbose=os.getenv("VERBOSE", "true").lower() == "true"

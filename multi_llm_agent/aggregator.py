@@ -3,7 +3,7 @@
 複数のLLM回答を分析・統合する
 """
 
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 from .llm_providers import LLMResponse, BaseLLMProvider
 from .config import Config
 
@@ -124,6 +124,16 @@ class ResponseAggregator:
                 system_prompt="あなたは複数の情報源からの回答を統合し、"
                              "包括的で正確な回答を生成する専門家です。"
             )
+
+            # デバッグ: 空のレスポンスの場合は詳細を記録
+            if not result.content:
+                # 空の場合はフォールバック
+                return self._simple_synthesis(responses)
+
+            # max_tokensに達して途中で切れた場合の警告
+            if result.finish_reason == "length" and self.config.verbose:
+                print(f"警告: 統合回答がmax_tokens上限に達しました（{result.metadata.get('completion_tokens', 'N/A')}トークン）")
+
             return result.content
 
         except Exception as e:
@@ -161,6 +171,16 @@ class ResponseAggregator:
                 system_prompt="あなたは複数の情報源からの回答を統合し、"
                              "包括的で正確な回答を生成する専門家です。"
             )
+
+            # デバッグ: 空のレスポンスの場合は詳細を記録
+            if not result.content:
+                # 空の場合はフォールバック
+                return self._simple_synthesis(responses)
+
+            # max_tokensに達して途中で切れた場合の警告
+            if result.finish_reason == "length" and self.config.verbose:
+                print(f"警告: 統合回答がmax_tokens上限に達しました（{result.metadata.get('completion_tokens', 'N/A')}トークン）")
+
             return result.content
 
         except Exception as e:

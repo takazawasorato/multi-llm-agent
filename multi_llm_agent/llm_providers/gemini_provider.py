@@ -1,27 +1,27 @@
 """
-Google Geminiプロバイダー
+Google Geminiプロバイダー（新APIパッケージ対応）
 """
 
 import time
 from typing import Optional
-import google.generativeai as genai
+from google import genai
+from google.genai.types import GenerateContentConfig
 from .base import BaseLLMProvider, LLMResponse
 
 
 class GeminiProvider(BaseLLMProvider):
-    """Google Geminiプロバイダー"""
+    """Google Geminiプロバイダー（google-genai使用）"""
 
     def __init__(
         self,
         api_key: str,
-        model: str = "gemini-pro",
+        model: str = "gemini-2.5-flash",
         temperature: float = 0.7,
         max_tokens: int = 2000,
         timeout: int = 60
     ):
         super().__init__(api_key, model, temperature, max_tokens, timeout)
-        genai.configure(api_key=api_key)
-        self.client = genai.GenerativeModel(model)
+        self.client = genai.Client(api_key=api_key)
 
     @property
     def provider_name(self) -> str:
@@ -36,20 +36,19 @@ class GeminiProvider(BaseLLMProvider):
         """非同期でレスポンスを生成"""
         start_time = time.time()
 
-        # Geminiではsystem promptとuser promptを結合
-        full_prompt = prompt
-        if system_prompt:
-            full_prompt = f"{system_prompt}\n\n{prompt}"
-
         try:
-            generation_config = genai.types.GenerationConfig(
+            # 設定を作成
+            config = GenerateContentConfig(
                 temperature=kwargs.get("temperature", self.temperature),
                 max_output_tokens=kwargs.get("max_tokens", self.max_tokens),
+                system_instruction=system_prompt if system_prompt else None
             )
 
-            response = await self.client.generate_content_async(
-                full_prompt,
-                generation_config=generation_config
+            # 非同期で生成
+            response = await self.client.aio.models.generate_content(
+                model=self.model,
+                contents=prompt,
+                config=config
             )
 
             response_time = time.time() - start_time
@@ -57,8 +56,8 @@ class GeminiProvider(BaseLLMProvider):
             return LLMResponse(
                 provider=self.provider_name,
                 model=self.model,
-                content=response.text,
-                tokens_used=None,  # Geminiはトークン数を返さない場合がある
+                content=response.text if response.text else "No content",
+                tokens_used=None,
                 finish_reason=None,
                 response_time=response_time,
                 metadata={}
@@ -83,20 +82,19 @@ class GeminiProvider(BaseLLMProvider):
         """同期版のレスポンス生成"""
         start_time = time.time()
 
-        # Geminiではsystem promptとuser promptを結合
-        full_prompt = prompt
-        if system_prompt:
-            full_prompt = f"{system_prompt}\n\n{prompt}"
-
         try:
-            generation_config = genai.types.GenerationConfig(
+            # 設定を作成
+            config = GenerateContentConfig(
                 temperature=kwargs.get("temperature", self.temperature),
                 max_output_tokens=kwargs.get("max_tokens", self.max_tokens),
+                system_instruction=system_prompt if system_prompt else None
             )
 
-            response = self.client.generate_content(
-                full_prompt,
-                generation_config=generation_config
+            # 同期で生成
+            response = self.client.models.generate_content(
+                model=self.model,
+                contents=prompt,
+                config=config
             )
 
             response_time = time.time() - start_time
@@ -104,7 +102,7 @@ class GeminiProvider(BaseLLMProvider):
             return LLMResponse(
                 provider=self.provider_name,
                 model=self.model,
-                content=response.text,
+                content=response.text if response.text else "No content",
                 tokens_used=None,
                 finish_reason=None,
                 response_time=response_time,

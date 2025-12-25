@@ -53,15 +53,10 @@ class ComprehensiveSearchAgent:
         seen_urls: Dict[str, Set[str]] = {name: set() for name in self.searchers.keys()}
 
         for iteration in range(iterations):
-            if self.config.verbose:
-                print(f"\n探索イテレーション {iteration + 1}/{iterations}")
-
             # イテレーションごとにクエリを多様化
             current_query = query
             if diversify_queries and iteration > 0:
                 current_query = self._diversify_query(query, iteration)
-                if self.config.verbose:
-                    print(f"多様化クエリ: {current_query}")
 
             # 並列検索
             tasks = []
@@ -81,8 +76,6 @@ class ComprehensiveSearchAgent:
             # 結果を集約（重複排除）
             for name, results in zip(searcher_names, results_list):
                 if isinstance(results, Exception):
-                    if self.config.verbose:
-                        print(f"{name}検索エラー: {results}")
                     continue
 
                 new_results = []
@@ -92,9 +85,6 @@ class ComprehensiveSearchAgent:
                         new_results.append(result)
 
                 all_results[name].extend(new_results)
-
-                if self.config.verbose:
-                    print(f"{name}: {len(new_results)}件の新規結果（累計: {len(all_results[name])}件）")
 
         return all_results
 
@@ -122,14 +112,9 @@ class ComprehensiveSearchAgent:
         seen_urls: Dict[str, Set[str]] = {name: set() for name in self.searchers.keys()}
 
         for iteration in range(iterations):
-            if self.config.verbose:
-                print(f"\n探索イテレーション {iteration + 1}/{iterations}")
-
             current_query = query
             if diversify_queries and iteration > 0:
                 current_query = self._diversify_query(query, iteration)
-                if self.config.verbose:
-                    print(f"多様化クエリ: {current_query}")
 
             for name, searcher in self.searchers.items():
                 try:
@@ -146,12 +131,8 @@ class ComprehensiveSearchAgent:
 
                     all_results[name].extend(new_results)
 
-                    if self.config.verbose:
-                        print(f"{name}: {len(new_results)}件の新規結果（累計: {len(all_results[name])}件）")
-
-                except Exception as e:
-                    if self.config.verbose:
-                        print(f"{name}検索エラー: {e}")
+                except Exception:
+                    pass
 
         return all_results
 

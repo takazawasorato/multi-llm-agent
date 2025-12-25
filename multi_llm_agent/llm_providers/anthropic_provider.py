@@ -52,7 +52,7 @@ class AnthropicProvider(BaseLLMProvider):
             return LLMResponse(
                 provider=self.provider_name,
                 model=self.model,
-                content=response.content[0].text,
+                content=response.content[0].text or "",
                 tokens_used=response.usage.input_tokens + response.usage.output_tokens,
                 finish_reason=response.stop_reason,
                 response_time=response_time,
@@ -97,7 +97,7 @@ class AnthropicProvider(BaseLLMProvider):
             return LLMResponse(
                 provider=self.provider_name,
                 model=self.model,
-                content=response.content[0].text,
+                content=response.content[0].text or "",
                 tokens_used=response.usage.input_tokens + response.usage.output_tokens,
                 finish_reason=response.stop_reason,
                 response_time=response_time,
