@@ -50,3 +50,9 @@ htmlcov/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+
+# Project specific
+output/
+.python-version
+uv.lock
+main.py
